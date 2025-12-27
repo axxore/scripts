@@ -1,12 +1,21 @@
 -- SpinHelper by Axxre
--- Jujutsu Zero – Clans
+-- Jujutsu Zero – Clans (external key system edition)
+
+---------------------------------------------------------------------
+-- KEY FROM main.lua (обязателен)
+---------------------------------------------------------------------
+
+local KEY_FROM_MAIN = (getgenv and getgenv().RavynethKey) or _G.RavynethKey
+
+if not KEY_FROM_MAIN or KEY_FROM_MAIN == "" then
+    error("❌ [Ravyneth] No valid key! Launch via ravyneth.space main.lua")
+end
+
+print("[Ravyneth] KEY_FROM_MAIN:", KEY_FROM_MAIN)
 
 ---------------------------------------------------------------------
 -- SETTINGS
 ---------------------------------------------------------------------
-
-local KEY_LINK_LINKVERTISE = "https://link-hub.net/2522229/FhciEmte8qIE"
-local ACCESS_KEY           = "XMAS"
 
 local TARGET_CODES = { "XMAS", "80Kmembers", "90smthKmembersYAY", "20KLIKES", "oopsMBgg" }
 
@@ -18,7 +27,6 @@ local CLAN_LIST = {
     "Sukuna","Tengen",
 }
 
--- ИСПРАВЛЕНО: Дефолтные таргет кланы
 local DEFAULT_TARGET_CLANS = {"Sukuna", "Tengen"}
 
 local TARGET_SPINS_PER_SEC = 5
@@ -32,7 +40,6 @@ local CONFIGS_FOLDER       = "JJK_Zero_Configs"
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService       = game:GetService("HttpService")
-local CoreGui           = game:GetService("CoreGui")
 
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -59,193 +66,9 @@ for _, n in ipairs(CLAN_LIST) do
     selectedClans[n] = false
 end
 
--- ИСПРАВЛЕНО: Изначально false, включается только через кнопку
 local autoSpinEnabled    = false
 local autoLoadConfigName = nil
 local Rayfield, Window
-
----------------------------------------------------------------------
--- KEY GUI
----------------------------------------------------------------------
-
-local KeyGui = Instance.new("ScreenGui")
-KeyGui.Name = "SpinHelper_KeyGui"
-KeyGui.ResetOnSpawn = false
-KeyGui.IgnoreGuiInset = true
-KeyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-KeyGui.Parent = CoreGui
-
-local RootFrame = Instance.new("Frame")
-RootFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-RootFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-RootFrame.Size = UDim2.new(0, 420, 0, 210)
-RootFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
-RootFrame.BorderSizePixel = 0
-RootFrame.ZIndex = 20
-RootFrame.Active = true
-RootFrame.Draggable = true
-RootFrame.Parent = KeyGui
-
-local RootCorner = Instance.new("UICorner")
-RootCorner.CornerRadius = UDim.new(0, 14)
-RootCorner.Parent = RootFrame
-
-local RootStroke = Instance.new("UIStroke")
-RootStroke.Color = Color3.fromRGB(50, 55, 80)
-RootStroke.Thickness = 1
-RootStroke.Transparency = 0.35
-RootStroke.Parent = RootFrame
-
-local Title = Instance.new("TextLabel")
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, -40, 0, 24)
-Title.Position = UDim2.new(0, 10, 0, 10)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.TextColor3 = Color3.fromRGB(235, 235, 245)
-Title.Text = "SpinHelper by Axxre – Key"
-Title.ZIndex = 21
-Title.Parent = RootFrame
-
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.AnchorPoint = Vector2.new(1, 0.5)
-CloseBtn.Size = UDim2.new(0, 22, 0, 22)
-CloseBtn.Position = UDim2.new(1, -10, 0, 22)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(32, 33, 42)
-CloseBtn.BorderSizePixel = 0
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 16
-CloseBtn.TextColor3 = Color3.fromRGB(220, 120, 120)
-CloseBtn.Text = "X"
-CloseBtn.ZIndex = 21
-CloseBtn.Parent = RootFrame
-
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(1, 0)
-CloseCorner.Parent = CloseBtn
-
-CloseBtn.MouseButton1Click:Connect(function()
-    KeyGui:Destroy()
-end)
-
-local Subtitle = Instance.new("TextLabel")
-Subtitle.BackgroundTransparency = 1
-Subtitle.Size = UDim2.new(1, -20, 0, 18)
-Subtitle.Position = UDim2.new(0, 10, 0, 36)
-Subtitle.Font = Enum.Font.Gotham
-Subtitle.TextSize = 13
-Subtitle.TextXAlignment = Enum.TextXAlignment.Left
-Subtitle.TextColor3 = Color3.fromRGB(170, 175, 190)
-Subtitle.Text = "Jujutsu Zero – Clans"
-Subtitle.ZIndex = 21
-Subtitle.Parent = RootFrame
-
-local KeyLabel = Instance.new("TextLabel")
-KeyLabel.BackgroundTransparency = 1
-KeyLabel.Size = UDim2.new(1, -20, 0, 18)
-KeyLabel.Position = UDim2.new(0, 10, 0, 60)
-KeyLabel.Font = Enum.Font.Gotham
-KeyLabel.TextSize = 13
-KeyLabel.TextXAlignment = Enum.TextXAlignment.Left
-KeyLabel.TextColor3 = Color3.fromRGB(180, 185, 200)
-KeyLabel.Text = "Enter your key:"
-KeyLabel.ZIndex = 21
-KeyLabel.Parent = RootFrame
-
-local KeyBox = Instance.new("TextBox")
-KeyBox.Size = UDim2.new(1, -20, 0, 32)
-KeyBox.Position = UDim2.new(0, 10, 0, 80)
-KeyBox.BackgroundColor3 = Color3.fromRGB(26, 27, 34)
-KeyBox.BorderSizePixel = 0
-KeyBox.Font = Enum.Font.Gotham
-KeyBox.TextSize = 16
-KeyBox.TextColor3 = Color3.fromRGB(230, 235, 245)
-KeyBox.PlaceholderText = "xxxx-xxxx"
-KeyBox.PlaceholderColor3 = Color3.fromRGB(120, 125, 140)
-KeyBox.ClearTextOnFocus = false
-KeyBox.Text = ""
-KeyBox.ZIndex = 21
-KeyBox.Parent = RootFrame
-
-local KB_Corner = Instance.new("UICorner")
-KB_Corner.CornerRadius = UDim.new(0, 8)
-KB_Corner.Parent = KeyBox
-
-local KB_Stroke = Instance.new("UIStroke")
-KB_Stroke.Color = Color3.fromRGB(60, 65, 90)
-KB_Stroke.Thickness = 1
-KB_Stroke.Transparency = 0.4
-KB_Stroke.Parent = KeyBox
-
-local Status = Instance.new("TextLabel")
-Status.BackgroundTransparency = 1
-Status.Size = UDim2.new(1, -20, 0, 18)
-Status.Position = UDim2.new(0, 10, 0, 116)
-Status.Font = Enum.Font.Gotham
-Status.TextSize = 13
-Status.TextXAlignment = Enum.TextXAlignment.Left
-Status.TextColor3 = Color3.fromRGB(170, 175, 190)
-Status.Text = "Get key via Linkvertise, then paste it above."
-Status.ZIndex = 21
-Status.Parent = RootFrame
-
-local function copyLink(link)
-    if typeof(setclipboard) == "function" then
-        pcall(setclipboard, link)
-        Status.Text = "Link copied to clipboard."
-        Status.TextColor3 = Color3.fromRGB(150, 220, 150)
-    else
-        Status.Text = "Copy manually: "..link
-        Status.TextColor3 = Color3.fromRGB(230, 210, 150)
-    end
-end
-
-local LinkBtn = Instance.new("TextButton")
-LinkBtn.Size = UDim2.new(1, -20, 0, 30)
-LinkBtn.Position = UDim2.new(0, 10, 0, 146)
-LinkBtn.BackgroundColor3 = Color3.fromRGB(35, 37, 46)
-LinkBtn.BorderSizePixel = 0
-LinkBtn.Font = Enum.Font.GothamBold
-LinkBtn.TextSize = 14
-LinkBtn.TextColor3 = Color3.fromRGB(235, 238, 245)
-LinkBtn.Text = "Get Key (Linkvertise)"
-LinkBtn.ZIndex = 21
-LinkBtn.Parent = RootFrame
-
-local LB_Corner = Instance.new("UICorner")
-LB_Corner.CornerRadius = UDim.new(0, 8)
-LB_Corner.Parent = LinkBtn
-
-local LB_Stroke = Instance.new("UIStroke")
-LB_Stroke.Color = Color3.fromRGB(80, 90, 130)
-LB_Stroke.Thickness = 1
-LB_Stroke.Transparency = 0.35
-LB_Stroke.Parent = LinkBtn
-
-LinkBtn.MouseButton1Click:Connect(function()
-    copyLink(KEY_LINK_LINKVERTISE)
-end)
-
-local function tryUnlock()
-    if KeyBox.Text == ACCESS_KEY then
-        Status.Text = "Key accepted. Loading UI..."
-        Status.TextColor3 = Color3.fromRGB(150, 220, 150)
-        task.delay(0.25, function()
-            KeyGui:Destroy()
-            loadMainUI()
-        end)
-    else
-        Status.Text = "Wrong key."
-        Status.TextColor3 = Color3.fromRGB(230, 130, 130)
-    end
-end
-
-KeyBox.FocusLost:Connect(function(enter)
-    if enter then
-        tryUnlock()
-    end
-end)
 
 ---------------------------------------------------------------------
 -- GAME LOGIC
@@ -347,7 +170,7 @@ local function listConfigs()
     if isfolder and listfiles and isfolder(CONFIGS_FOLDER) then
         local all = listfiles(CONFIGS_FOLDER)
         for _, path in ipairs(all) do
-            local name = path:match("[/\\]([^/\\\\]+)%.json$")
+            local name = path:match("[/\\]([^/\\]+)%.json$")
             if name then
                 table.insert(files, name)
             end
@@ -389,10 +212,6 @@ local function loadConfig(name)
             selectedClans[n] = data.SelectedClans[n] == true
         end
     end
-    -- ИСПРАВЛЕНО: НЕ загружаем AutoSpin из конфига при autoload
-    -- if type(data.AutoSpin) == "boolean" then
-    --     autoSpinEnabled = data.AutoSpin
-    -- end
     if data.AutoLoad then
         autoLoadConfigName = name
     end
@@ -403,7 +222,7 @@ end
 -- MAIN UI (RAYFIELD)
 ---------------------------------------------------------------------
 
-function loadMainUI()
+local function loadMainUI()
     print("🔵 loadMainUI() STARTED")
     
     Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
@@ -479,9 +298,8 @@ function loadMainUI()
         end
     })
     
-    -- ИСПРАВЛЕНО: Устанавливаем дефолтные кланы после создания dropdown
     task.spawn(function()
-        task.wait(0.5) -- Даем UI загрузиться
+        task.wait(0.5)
         for _, clanName in ipairs(DEFAULT_TARGET_CLANS) do
             selectedClans[clanName] = true
         end
@@ -618,8 +436,6 @@ function loadMainUI()
                     if selectedClans[n] then table.insert(opts, n) end
                 end
                 ClanDropdown:Set(opts)
-                -- ИСПРАВЛЕНО: НЕ включаем AutoSpin при загрузке конфига
-                -- AutoSpinToggle:Set(autoSpinEnabled)
                 setStatus("Config '"..name.."' loaded.")
             else
                 setStatus("Load failed: "..tostring(err))
@@ -654,7 +470,6 @@ function loadMainUI()
     
     print("🔵 ConfigTab completed, starting autoload...")
 
-    -- autoload config - ЗАЩИЩЁННАЯ ВЕРСИЯ
     do
         local success, err = pcall(function()
             local configs = listConfigs()
@@ -675,8 +490,6 @@ function loadMainUI()
                                     if selectedClans[n] then table.insert(opts, n) end
                                 end
                                 pcall(ClanDropdown.Set, ClanDropdown, opts)
-                                -- ИСПРАВЛЕНО: НЕ включаем AutoSpin при autoload
-                                -- pcall(AutoSpinToggle.Set, AutoSpinToggle, autoSpinEnabled)
                                 autoLoadConfigName = name
                                 break
                             end
@@ -755,3 +568,9 @@ function loadMainUI()
     Rayfield:LoadConfiguration()
     print("🏁 loadMainUI() completed!")
 end
+
+---------------------------------------------------------------------
+-- ENTRYPOINT
+---------------------------------------------------------------------
+
+loadMainUI()
